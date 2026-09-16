@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "ListenUp",
+  "version": "0.1.0",
+  "description": "Read the current page or highlighted text aloud with a local Chatterbox TTS server.",
+  "minimum_chrome_version": "116",
+  "permissions": ["contextMenus", "activeTab", "scripting", "storage", "offscreen"],
+  "host_permissions": ["http://127.0.0.1/*", "http://localhost/*"],
+  "background": { "service_worker": "background.js" },
+  "action": {
+    "default_title": "ListenUp",
+    "default_popup": "popup.html",
+    "default_icon": { "16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png", "128": "icons/icon128.png" }
+  },
+  "icons": { "16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png", "128": "icons/icon128.png" },
+  "commands": {
+    "read-selection": {
+      "suggested_key": { "default": "Alt+Shift+L" },
+      "description": "Read selection (or page if nothing is selected)"
+    },
+    "toggle-pause": {
+      "suggested_key": { "default": "Alt+Shift+P" },
+      "description": "Pause / resume"
+    }
+  }
+}

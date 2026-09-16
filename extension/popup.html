@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ListenUp</title>
+  <style>
+    :root { color-scheme: light dark; --accent: #3b82f6; --muted: #888; --bg2: rgba(127,127,127,.12); }
+    body { font: 13px/1.4 system-ui, sans-serif; width: 320px; margin: 0; padding: 12px; }
+    h1 { font-size: 15px; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+    h1 .dot { width: 8px; height: 8px; border-radius: 50%; background: #999; }
+    h1 .dot.ok { background: #22c55e; } h1 .dot.bad { background: #ef4444; }
+    .row { display: flex; gap: 6px; margin-bottom: 8px; }
+    button { flex: 1; padding: 7px 8px; border: 1px solid rgba(127,127,127,.35); border-radius: 6px; background: var(--bg2); cursor: pointer; font: inherit; }
+    button.primary { background: var(--accent); color: #fff; border-color: transparent; }
+    button:disabled { opacity: .45; cursor: default; }
+    .transport button { flex: 0 0 auto; min-width: 44px; }
+    .status { background: var(--bg2); border-radius: 6px; padding: 8px; min-height: 52px; margin-bottom: 8px; }
+    .status .title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .status .seg { color: var(--muted); font-size: 12px; max-height: 3.6em; overflow: hidden; }
+    .status .err { color: #ef4444; }
+    progress { width: 100%; height: 6px; }
+    details { margin-top: 6px; }
+    summary { cursor: pointer; color: var(--muted); }
+    label { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 6px 0; }
+    label input[type=text], label select { width: 170px; font: inherit; }
+    label input[type=range] { width: 130px; }
+    .small { color: var(--muted); font-size: 11px; }
+  </style>
+</head>
+<body>
+  <h1><span class="dot" id="dot"></span> ListenUp <span class="small" id="health"></span></h1>
+  <div class="row">
+    <button class="primary" id="readPage">Read page</button>
+    <button id="readSel">Read selection</button>
+  </div>
+  <div class="status">
+    <div class="title" id="title">Idle</div>
+    <div class="seg" id="seg"></div>
+    <div class="err" id="err"></div>
+    <progress id="prog" value="0" max="1" hidden></progress>
+    <div class="small" id="counter"></div>
+  </div>
+  <div class="row transport">
+    <button id="prev" title="Previous sentence">⏮</button>
+    <button id="toggle" title="Pause/resume">⏯</button>
+    <button id="next" title="Next sentence">⏭</button>
+    <button id="stop" title="Stop">⏹</button>
+    <label style="flex:1;margin:0"><span class="small">Speed</span><input type="range" id="rate" min="0.7" max="1.6" step="0.05"></label>
+  </div>
+  <details>
+    <summary>Settings</summary>
+    <label>Server URL <input type="text" id="serverUrl"></label>
+    <label>LLM cleanup <input type="checkbox" id="useLlm"></label>
+    <label>LLM model <input type="text" id="llmModel" placeholder="server default"></label>
+    <label>Voice <select id="voice"><option value="default">default</option></select></label>
+    <label>Temperature <input type="range" id="temperature" min="0.3" max="1.2" step="0.05"></label>
+    <label>Exaggeration <input type="range" id="exaggeration" min="0" max="1.5" step="0.05"></label>
+    <label>CFG weight <input type="range" id="cfgWeight" min="0" max="1" step="0.05"></label>
+    <div class="small">Exaggeration and CFG only apply to the "standard" engine. Drop .wav files into server/voices to clone a voice.</div>
+  </details>
+  <script src="popup.js"></script>
+</body>
+</html>
