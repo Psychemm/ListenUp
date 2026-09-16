@@ -5,6 +5,23 @@ let current = null; // { jobId, serverUrl, index, audio, cancelled, rate, chunks
 let audio = new Audio();
 audio.preload = "auto";
 
+// Route the element through a gain node so volume can go above 100%.
+let ctx = null, gain = null;
+function setVolume(v) {
+  try {
+    if (!ctx) {
+      ctx = new AudioContext();
+      gain = ctx.createGain();
+      ctx.createMediaElementSource(audio).connect(gain);
+      gain.connect(ctx.destination);
+    }
+    if (ctx.state === "suspended") ctx.resume();
+    gain.gain.value = Math.max(0, Math.min(2, Number(v) || 1));
+  } catch (e) {
+    audio.volume = Math.max(0, Math.min(1, Number(v) || 1));
+  }
+}
+
 function report(patch) {
   chrome.runtime.sendMessage({ type: "player-state", patch }).catch(() => {});
 }
@@ -89,7 +106,11 @@ chrome.runtime.onMessage.addListener((msg) => {
     case "offscreen-play":
       stopCurrent();
       current = { jobId: msg.jobId, serverUrl: msg.serverUrl, index: 0, cancelled: false, rate: msg.playbackRate || 1, chunks: new Map(), segments: [], total: 0, skipResolve: null };
+      setVolume(msg.volume ?? 1);
       run(current);
+      break;
+    case "offscreen-volume":
+      setVolume(msg.volume);
       break;
     case "offscreen-pause":
       audio.pause();

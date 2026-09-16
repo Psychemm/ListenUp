@@ -10,6 +10,7 @@ const DEFAULTS = {
   exaggeration: 0.5,
   cfgWeight: 0.5,
   playbackRate: 1.0,
+  volume: 1.0,
 };
 
 let state = { status: "idle", jobId: null, title: "", index: 0, total: 0, segment: "", error: "", ready: 0 };
@@ -75,7 +76,7 @@ async function startReading(tab, mode) {
     const { id } = await r.json();
     setState({ jobId: id, title: page.title || page.text.slice(0, 60) });
     await ensureOffscreen();
-    chrome.runtime.sendMessage({ type: "offscreen-play", jobId: id, serverUrl: settings.serverUrl, playbackRate: Number(settings.playbackRate) });
+    chrome.runtime.sendMessage({ type: "offscreen-play", jobId: id, serverUrl: settings.serverUrl, playbackRate: Number(settings.playbackRate), volume: Number(settings.volume) });
   } catch (e) {
     console.error(e);
     setState({ status: "error", error: String(e.message || e) });
@@ -119,6 +120,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     case "stop": stop(); sendResponse({ ok: true }); break;
     case "skip": chrome.runtime.sendMessage({ type: "offscreen-skip", delta: msg.delta || 1 }); sendResponse({ ok: true }); break;
     case "set-rate": chrome.runtime.sendMessage({ type: "offscreen-rate", rate: msg.rate }); sendResponse({ ok: true }); break;
+    case "set-volume": chrome.runtime.sendMessage({ type: "offscreen-volume", volume: msg.volume }); sendResponse({ ok: true }); break;
     case "get-state": sendResponse(state); break;
     case "player-state": setState(msg.patch); sendResponse({ ok: true }); break;
     default: return false;
