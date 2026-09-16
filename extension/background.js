@@ -33,11 +33,13 @@ function setState(patch) {
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({ id: "read-selection", title: "ListenUp: read selection", contexts: ["selection"] });
+  chrome.contextMenus.create({ id: "read-from-selection", title: "ListenUp: read page from here", contexts: ["selection"] });
   chrome.contextMenus.create({ id: "read-page", title: "ListenUp: read this page", contexts: ["page", "frame", "link", "image"] });
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === "read-selection") startReading(tab, "selection");
+  if (info.menuItemId === "read-from-selection") startReading(tab, "from-selection");
   if (info.menuItemId === "read-page") startReading(tab, "page");
 });
 
@@ -47,7 +49,8 @@ chrome.commands.onCommand.addListener(async (cmd) => {
   if (cmd === "toggle-pause") togglePause();
 });
 
-async function extract(tab) {
+async function extract(tab, mode) {
+  await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: (m) => { window.__listenupMode = m; }, args: [mode] });
   const [res] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });
   return res?.result;
 }
@@ -55,7 +58,8 @@ async function extract(tab) {
 async function startReading(tab, mode) {
   try {
     setState({ status: "loading", error: "", index: 0, total: 0, segment: "", ready: 0 });
-    const page = await extract(tab);
+    const page = await extract(tab, mode);
+    if (page?.error) throw new Error(page.error);
     if (!page || !page.text || page.text.trim().length < 2) throw new Error("No readable text found on this page.");
     if (mode === "selection" && page.source !== "selection") throw new Error("Nothing is selected.");
     const settings = await getSettings();

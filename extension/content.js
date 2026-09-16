@@ -53,7 +53,9 @@
     return best || document.body;
   }
 
-  function collect(root) {
+  function collect(root) { return collectBlocks(root).map(b => b.text); }
+
+  function collectBlocks(root) {
     const out = [];
     const seen = new Set();
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
@@ -74,14 +76,36 @@
       if (el.tagName === "PRE") { t = "[Code block omitted.]"; }
       if (/^H[1-6]$/.test(el.tagName) && !/[.!?:]$/.test(t)) t += ".";
       if (t.length < 3) continue;
-      out.push(t);
+      out.push({ el, text: t });
     }
     return out;
   }
 
-  const selection = (window.getSelection && window.getSelection().toString().trim()) || "";
+  const mode = window.__listenupMode || "auto";   // auto | page | selection | from-selection
+  const sel = window.getSelection && window.getSelection();
+  const selection = (sel && sel.toString().trim()) || "";
   const title = (document.querySelector("h1")?.innerText || document.title || "").trim();
-  if (selection.length > 0) {
+
+  if (mode === "from-selection") {
+    if (!selection || !sel.rangeCount) return { title: "", text: "", source: "none", url: location.href, error: "Select where reading should start." };
+    const range = sel.getRangeAt(0);
+    const startEl = range.startContainer.nodeType === Node.TEXT_NODE ? range.startContainer.parentElement : range.startContainer;
+    let root = pickRoot();
+    if (!root.contains(startEl)) root = document.body;
+    const blocks = collectBlocks(root);
+    // First block that is, contains, or comes after the selection start.
+    const idx = blocks.findIndex(b => b.el === startEl || b.el.contains(startEl) ||
+      (startEl.compareDocumentPosition(b.el) & Node.DOCUMENT_POSITION_FOLLOWING));
+    if (idx < 0) return { title: "", text: "", source: "none", url: location.href, error: "Could not locate the selection in the page text." };
+    const texts = blocks.slice(idx).map(b => b.text);
+    // Trim the first block so reading begins at the selected words.
+    const head = selection.slice(0, 40).replace(/\s+/g, " ");
+    const at = texts[0].indexOf(head);
+    if (at > 0) texts[0] = texts[0].slice(at);
+    return { title: "", text: texts.join("\n\n"), source: "from-selection", url: location.href };
+  }
+
+  if (mode !== "page" && selection.length > 0) {
     return { title: "", text: selection, source: "selection", url: location.href };
   }
   const root = pickRoot();

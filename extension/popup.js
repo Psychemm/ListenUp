@@ -52,6 +52,7 @@ async function refreshHealth(s) {
 
 $("readPage").onclick = async () => { await saveSettings(); send({ type: "read", mode: "page" }); };
 $("readSel").onclick = async () => { await saveSettings(); send({ type: "read", mode: "selection" }); };
+$("readFrom").onclick = async () => { await saveSettings(); send({ type: "read", mode: "from-selection" }); };
 $("toggle").onclick = () => send({ type: "toggle" });
 $("stop").onclick = () => send({ type: "stop" });
 $("prev").onclick = () => send({ type: "skip", delta: -1 });

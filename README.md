@@ -58,13 +58,15 @@ extension's Settings. `default` is Chatterbox's built-in voice.
 3. **Load unpacked** → choose the `extension/` folder.
 4. Pin ListenUp to the toolbar.
 
-Use it via the toolbar popup, the right-click menu ("ListenUp: read selection" /
-"read this page"), or the shortcuts **Alt+Shift+L** (read selection, or the page if
+Use it via the toolbar popup (Read page / Read selection / From here), the right-click
+menu ("ListenUp: read selection", "read page from here", "read this page"), or the shortcuts **Alt+Shift+L** (read selection, or the page if
 nothing is selected) and **Alt+Shift+P** (pause/resume).
 
 ## How the text pipeline works
 
-1. `content.js` grabs the selection, or finds the main article container (article/main,
+1. `content.js` grabs the selection, or finds the main article container. "From here" mode
+   finds the block containing the selection start and reads from those words to the end.
+   It also finds the main article container (article/main,
    else the densest cluster of paragraphs), skipping nav, footers, sidebars, comments,
    code blocks and hidden elements.
 2. The server batches paragraphs (a small first batch for fast start), sends each batch
